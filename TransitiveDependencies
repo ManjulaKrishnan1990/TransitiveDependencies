@@ -1,0 +1,64 @@
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Queue;
+import java.util.Set;
+
+public class TransitiveDependencies {
+    Map<String, HashSet<String>> inputDependencies = new HashMap<String,HashSet<String>>();
+
+    public static void main(String args[]) {
+        TransitiveDependencies transitiveDependencies = new TransitiveDependencies();
+        transitiveDependencies.addDirectDependency("A B C");
+        transitiveDependencies.addDirectDependency("B C E");
+        transitiveDependencies.addDirectDependency("C G");
+        transitiveDependencies.addDirectDependency("D A F");
+        transitiveDependencies.addDirectDependency("E F");
+        transitiveDependencies.addDirectDependency("F H");
+        System.out.println(transitiveDependencies.getAllDependencies());
+    }
+
+    public boolean addDirectDependency(String directDependency) {
+        String[] directDependencyList = directDependency.split(" ");
+        String key = directDependencyList[0];
+        HashSet<String> dependencies = new HashSet<String>();
+        for (int i = 1; i < directDependencyList.length; i++) {
+            dependencies.add(directDependencyList[i]);
+        }
+        return inputDependencies.put(key, dependencies) != null;
+    }
+    public Map<String, HashSet<String>> getAllDependencies() {
+        Map<String, HashSet<String>> transitiveDependencies = new HashMap<String, HashSet<String>>();
+        for (Entry<String, HashSet<String>> entry : inputDependencies.entrySet()) {
+            String key = entry.getKey();
+            Set<String> keyDependencies = entry.getValue();
+            Queue<String> dependeciesQueue = new LinkedList<String>();
+            if (keyDependencies != null) {
+                for (String keyDependency : keyDependencies) {
+                    dependeciesQueue.add(keyDependency);
+                }
+            }
+            // store all the dependencies
+            HashSet<String> allDependencies = new HashSet<String>();
+            Queue<String> tempDependencies = new LinkedList<String>();
+            while (!dependeciesQueue.isEmpty()) {
+                for (String dependencyQueue : dependeciesQueue) {
+                    allDependencies.add(dependencyQueue);
+                    if (inputDependencies.get(dependencyQueue) != null) {
+                        for (String s : inputDependencies.get(dependencyQueue)) {
+                            tempDependencies.add(s);
+                        }
+                    }
+                }
+                // Replace dependeciesQueue with tempDependencies and make the tempDependencies as new list of dependencies
+                dependeciesQueue = tempDependencies;
+                tempDependencies = new LinkedList<String>();
+            }
+            // Final List
+            transitiveDependencies.put(key, allDependencies);
+        }
+        return transitiveDependencies;
+    }
+}
